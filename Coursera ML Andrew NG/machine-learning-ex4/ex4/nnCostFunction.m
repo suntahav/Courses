@@ -72,23 +72,46 @@ for i = 1:size(y)(1)
   y_recoded(i,y(i)) = 1;
 endfor
 %First pass gives 5000x26
-
-a1 = sigmoid(X*Theta1');
-a1 = [ones(size(a1, 1), 1) a1];
-% Second pass gives 5000*10
-z2 = a1*Theta2'
+a1= X;
+z2 = X*Theta1';
 a2 = sigmoid(z2);
+a2 = [ones(size(a1, 1), 1) a2];
+% Second pass gives 5000*10
+z3 = a2*Theta2';
+a3 = sigmoid(z3);
 
-J = sum(sum((-1*y_recoded).*log(a2) - (1-y_recoded).*log(1-a2)))/size(X, 1);
+J = sum(sum((-1*y_recoded).*log(a3) - (1-y_recoded).*log(1-a3)))/size(X, 1) + (lambda/(2*m))*(sum(sum(Theta1(:,2:end).^2)) + sum(sum(Theta2(:,2:end).^2)));
 
 %----------------------------------------------------------------------------------
 %Part 2
+%
+%delta3 = sum(a3 - y_recoded);
+%Theta2_grad = (delta3'.*Theta2)/m;
+%temp = sigmoidGradient(z2);
+%delta2 = sum((delta3*Theta2)(2:end).*temp);
+%Theta1_grad = (delta2.*a2)/m;
 
-delta_3 = a2 - y_recoded
-
-Theta2_grad = Theta2' * delta_3.*sigmoidGradient(z2)
-
-
+delta1 = 0;
+delta2 = 0;
+for i=1:m
+  a1 = X(i,:);
+  z2 =  a1*Theta1';
+  a2 = sigmoid(z2);
+  a2 = [ones(size(a1, 1), 1) a2];
+  z3 = a2*Theta2';
+  a3 = sigmoid(z3);
+  del3 = a3 - y_recoded(i,:);
+  del2 = (del3 * Theta2)(2:end).*sigmoidGradient(z2);
+  delta2 = delta2 + del3'*a2;
+  delta1 = delta1 + del2'*a1;
+  
+endfor
+reg_term1 = zeros(size(Theta1));
+reg_term1(:,2:end) = Theta1(:,2:end);
+reg_term2 = zeros(size(Theta2));
+reg_term2(:,2:end) = Theta2(:,2:end);
+Theta1_grad = delta1/m + (lambda/m)*reg_term1;
+Theta2_grad = delta2/m+ (lambda/m)*reg_term2;
 
 
 
