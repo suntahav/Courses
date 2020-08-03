@@ -24,6 +24,7 @@ J = sum((X*theta - y).^2)/(2*m) + (lambda/(2*m))*sum(theta(2:end,:).^2);
 
 grad(1,:) = sum(X(:,1)'*(X*theta - y))/m;
 
+%Remember sigma not always sum can be handled with matrix multiply
 grad(2:end,:) = (X(:,2:end)'*(X*theta - y))/m + (lambda/m)*theta(2:end,:);
 
 
